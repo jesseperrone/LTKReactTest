@@ -3,28 +3,35 @@ import ReactDOM from 'react-dom';
 import { Formik, Field, Form } from 'formik';
 import { Button } from '@mui/material';
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper} from '@mui/material';
+import { addTodo, deleteTodo } from './redux/todoSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Todo = () => {
-  const [todos,SetTodos] = useState([]);
+  const todos = useSelector(state => state.todos);
+  const dispatch = useDispatch();
   const handleSubmit = (values) =>{
-    const newTodo = {todo: values.todo, id: crypto.randomUUID()};
-    SetTodos([...todos,newTodo]);
+    dispatch(addTodo({
+      title:values.title
+    }))
   }
-  const handleDelete = (id) =>{
-    const newTodos = todos.filter(todo => todo.id != id);
-    SetTodos(newTodos);
+  const handleDelete = (values) =>{
+    dispatch(deleteTodo({
+      id: values.id
+    }))
   }
   return(
   <div>
     <h1>TODO</h1>
     <Formik
-      initialValues={{todo:''}}
-      onSubmit={(values) => {handleSubmit(values)}}
+      initialValues={{title:''}}
+      onSubmit={(values, {resetForm}) => {
+        handleSubmit(values);
+        resetForm();
+      }}
     >
       <Form>
-        <label htmlFor="todo">Add ToDo </label>
-        <Field id="todo" name="todo" type="todo" placeholder="Write your ToDo Here" />
-        <button type="submit">Submit</button>
+        <Field id="title" name="title" type="text" placeholder="Write your ToDo Here" />
+        <Button variant='contained' sx={{height:20}} type="submit">Submit</Button>
       </Form>
     </Formik>
 <TableContainer component={Paper}>
@@ -33,8 +40,8 @@ const Todo = () => {
      <TableBody>
       {todos.map((todo) => (
         <TableRow>
-          <TableCell>{todo.todo}</TableCell>
-          <TableCell><Button color="error" onClick={() => handleDelete(todo.id)}> Delete </Button></TableCell>
+          <TableCell>{todo.title}</TableCell>
+          <TableCell align = 'right'><Button variant='contained' color="error" onClick={() => handleDelete(todo)}> Delete </Button></TableCell>
         </TableRow>
       ))}
      </TableBody>
